@@ -1,79 +1,54 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-
-	type NoteName = 'C' | 'C#' | 'D' | 'D#' | 'E' | 'F' | 'F#' | 'G' | 'G#' | 'A' | 'A#' | 'B';
-
-	interface NoteInfo {
-		name: string;
-		noteName: NoteName;
-		octave: number;
-	}
-
-	const NOTE_NAMES: NoteName[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-
-	export const NOTE_MAP = new Map<number, NoteInfo>();
-
-	// Generate notes from MIDI 21 (A0) to 108 (C8)
-	for (let midiNote = 21; midiNote <= 108; midiNote++) {
-		const octave = Math.floor((midiNote - 12) / 12);
-		const noteIndex = (midiNote - 12) % 12;
-		const noteName = NOTE_NAMES[noteIndex];
-
-		NOTE_MAP.set(midiNote, {
-			name: `${noteName}${octave}`,
-			noteName,
-			octave
-		});
-	}
-
-	// Helper function to get note info
-	export function getNoteInfo(midiNote: number): NoteInfo | undefined {
-		return NOTE_MAP.get(midiNote);
-	}
-
-	// Helper function to get MIDI note from note name
-	export function getMidiNote(noteName: string): number | undefined {
-		for (const [midi, info] of NOTE_MAP.entries()) {
-			if (info.name === noteName) {
-				return midi;
-			}
-		}
-		return undefined;
-	}
+	import { Note, Chord } from 'tonal';
 
 	let midi = $state<MIDIAccess | null>(null); // global MIDIAccess object
 	let midiError = $state<string | null>(null);
 	let chosenInputDevice = $state<MIDIInput | null>(null);
-	let playedNoteName = $state<NoteName | null>(null);
+	let midiNotes = $state<number[]>([]);
+	let notes = $state<string[]>([]);
+	let chordNames = $state<string[]>([]);
+
 	$inspect(chosenInputDevice).with((_, value: MIDIInput | null) => {
 		if (value) {
 			value.onmidimessage = onMIDIMessage;
 		}
 	});
 
-	function onMIDISuccess(midiAccess: MIDIAccess) {
-		console.log('MIDI ready!');
-		midi = midiAccess; // store in the global (in real usage, would probably keep in an object instance)
+	function onMIDISuccess(access: MIDIAccess) {
+		midi = access; // store in the global (in real usage, would probably keep in an object instance)
 
 		if (midi.inputs.size === 1) {
 			chosenInputDevice = midi.inputs.values().next().value as MIDIInput;
 		}
+
+		access.onstatechange = (event) => {
+			console.info(`${event.port.manufacturer}: ${event.port.name} ${event.port.state}`);
+		};
 	}
 
-	function onMIDIFailure(msg: any) {
-		console.error(`Failed to get MIDI access - ${msg}`);
-		midiError = `Failed to get MIDI access - ${msg}`;
+	function onMIDIFailure(access: MIDIAccess) {
+		console.error(`Failed to get MIDI access - ${access}`);
+		midiError = `Failed to get MIDI access - ${access}`;
 	}
 
 	function onMIDIMessage(message: MIDIMessageEvent) {
 		const data = message.data;
 		if (!data) return;
 		const cmd = data[0];
-		const note = data[1];
+		const midiNote = data[1];
 
 		if (cmd === 144) {
-			playedNoteName = getNoteInfo(note)?.noteName ?? null;
+			midiNotes.push(midiNote);
 		}
+
+		if (cmd === 128) {
+			midiNotes = midiNotes.filter((n) => n !== midiNote);
+		}
+
+		notes = midiNotes.map(Note.fromMidi);
+
+		chordNames = Chord.detect(notes);
 	}
 
 	onMount(async () => {
@@ -103,7 +78,7 @@
 				{#if midi}
 					<p>choose your midi input device:</p>
 					<ul>
-						{#each midi.inputs.values() as input}
+						{#each midi.inputs.values() as input (input)}
 							<li>
 								<button
 									class="cursor-pointer bg-fuchsia-900 text-white"
@@ -126,8 +101,10 @@
 	{/if}
 
 	<div class="flex w-full flex-1 flex-col items-center justify-center gap-2">
-		{#if playedNoteName}
-			<h1 class="text-9xl font-bold">{playedNoteName}</h1>
+		{#if chordNames.length}
+			{#each chordNames as chordName (chordName)}
+				<h1 class="text-9xl font-bold">{chordName}</h1>
+			{/each}
 		{/if}
 	</div>
 </div>

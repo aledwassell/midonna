@@ -61,5 +61,8 @@
 	},
 	"keywords": [
 		"svelte"
-	]
+	],
+	"dependencies": {
+		"tonal": "^6.4.3"
+	}
 }

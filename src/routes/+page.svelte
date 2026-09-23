@@ -7,7 +7,7 @@
 	let chosenInputDevice = $state<MIDIInput | null>(null);
 	let midiNotes = $state<number[]>([]);
 	let notes = $state<string[]>([]);
-	let chordNames = $state<string[]>([]);
+	let chords = $state<string[]>([]);
 
 	$inspect(chosenInputDevice).with((_, value: MIDIInput | null) => {
 		if (value) {
@@ -48,7 +48,7 @@
 
 		notes = midiNotes.map(Note.fromMidi);
 
-		chordNames = Chord.detect(notes);
+		chords = Chord.detect(notes);
 	}
 
 	onMount(async () => {
@@ -101,10 +101,19 @@
 	{/if}
 
 	<div class="flex w-full flex-1 flex-col items-center justify-center gap-2">
-		{#if chordNames.length}
-			{#each chordNames as chordName (chordName)}
-				<h1 class="text-9xl font-bold">{chordName}</h1>
+		{#if chords.length}
+			{#each chords as chord (chord)}
+				<h1 class="text-9xl font-bold">{chord}</h1>
 			{/each}
+		{/if}
+		{#if notes.length}
+			<div class="flex gap-2">
+				<span>[</span>
+				{#each notes as note (note)}
+					<span class="text-lg">{note}</span>
+				{/each}
+				<span>]</span>
+			</div>
 		{/if}
 	</div>
 </div>

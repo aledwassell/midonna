@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Note, Chord } from 'tonal';
+	import Keyboard from '$lib/components/Keyboard.svelte';
 
 	let midi = $state<MIDIAccess | null>(null); // global MIDIAccess object
 	let midiError = $state<string | null>(null);
@@ -100,20 +101,14 @@
 		<p class="bg-red-500 text-white">Error: {midiError}</p>
 	{/if}
 
-	<div class="flex w-full flex-1 flex-col items-center justify-center gap-2">
+	<div class="flex w-full flex-1 flex-col items-center justify-end">
+		<Keyboard activeNotes={notes} />
+	</div>
+	<div class="flex w-full flex-1 flex-col items-center justify-start">
 		{#if chords.length}
 			{#each chords as chord (chord)}
 				<h1 class="text-9xl font-bold">{chord}</h1>
 			{/each}
-		{/if}
-		{#if notes.length}
-			<div class="flex gap-2">
-				<span>[</span>
-				{#each notes as note (note)}
-					<span class="text-lg">{note}</span>
-				{/each}
-				<span>]</span>
-			</div>
 		{/if}
 	</div>
 </div>

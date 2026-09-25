@@ -1,6 +1,12 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
+@layer base {
+	body {
+		font-family: 'Space Mono', monospace;
+	}
+}
+
 .gravity-ui--arrow-rotate-left {
     display: inline-block;
     width: 16px;

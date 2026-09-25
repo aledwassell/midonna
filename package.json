@@ -35,5 +35,11 @@
 		"typescript-eslint": "^8.44.1",
 		"vite": "^7.1.7",
 		"vite-plugin-devtools-json": "^1.0.0"
+	},
+	"keywords": [
+		"svelte"
+	],
+	"dependencies": {
+		"tonal": "^6.4.3"
 	}
 }

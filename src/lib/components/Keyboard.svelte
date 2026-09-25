@@ -1,5 +1,5 @@
 <script>
-	let { activeNotes } = $props();
+	let { activeNotes, noteNames = true } = $props();
 	let activeNotesMapped = $derived(activeNotes.map((note) => note.replace(/\d+$/, '')));
 
 	const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
@@ -12,12 +12,14 @@
 			class="flex h-[264px] w-[56px] items-end justify-center border-8 border-t-0 border-neutral-50 text-center text-slate-700 {activeNotesMapped.includes(
 				whiteKey
 			)
-				? 'bg-pink-500'
+				? 'border-fuchsia-300! bg-fuchsia-500'
 				: 'bg-neutral-200'}"
 		>
-			<span>
-				{whiteKey}
-			</span>
+			{#if noteNames}
+				<span>
+					{whiteKey}
+				</span>
+			{/if}
 		</div>
 	{/each}
 	<div class="absolute left-[32px] flex w-full justify-between">
@@ -27,12 +29,14 @@
 					class="box-border flex h-full w-5/6 items-end justify-center {blackKey
 						? 'border-8 border-t-0 border-slate-900 bg-slate-700'
 						: ''}
-						{activeNotesMapped.includes(blackKey) ? 'bg-pink-500!' : ''}
+						{activeNotesMapped.includes(blackKey) ? 'border-fuchsia-300! bg-fuchsia-500!' : ''}
 						"
 				>
-					<span>
-						{blackKey}
-					</span>
+					{#if noteNames}
+						<span>
+							{blackKey}
+						</span>
+					{/if}
 				</div>
 			</div>
 		{/each}

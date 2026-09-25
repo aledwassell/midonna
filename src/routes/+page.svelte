@@ -9,9 +9,9 @@
 	let notes = $state<string[]>([]);
 	let chords = $state<string[]>([]);
 
-	$inspect(chosenInputDevice).with((_, value: MIDIInput | null) => {
-		if (value) {
-			value.onmidimessage = onMIDIMessage;
+	$effect(() => {
+		if (chosenInputDevice) {
+			chosenInputDevice.onmidimessage = onMIDIMessage;
 		}
 	});
 

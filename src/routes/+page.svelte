@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { Note, Chord } from 'tonal';
 	import Keyboard from '$lib/components/Keyboard.svelte';
+	import { playNote } from '$lib/tones.js';
 
 	let midi = $state<MIDIAccess | null>(null); // global MIDIAccess object
 	let midiError = $state<string | null>(null);
@@ -41,6 +42,7 @@
 
 		if (cmd === 144) {
 			midiNotes.push(midiNote);
+			playNote(midiNote);
 		}
 
 		if (cmd === 128) {
